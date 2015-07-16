@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import os
+import sys
 import uuid
 from datetime import time, date, datetime, timedelta
 from random import randint
@@ -20,10 +21,8 @@ class RockStar:
 
     def __init__(self, days=400):
         self.days = days
-        self.file_path = os.path.join(os.path.dirname(
-            os.path.abspath(__file__)), 'main.cpp')
-        self.repo_path = os.path.join(
-            os.path.dirname(os.path.abspath(__file__)))
+        self.file_path = os.path.join(os.getcwd(), 'main.cpp')
+        self.repo_path = os.getcwd()
 
     def _make_last_commit(self):
         with open(self.file_path, 'w') as f:
