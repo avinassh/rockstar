@@ -16,17 +16,22 @@ int main()
   std::cout << "Hello World!";
 }"""
 
+default_file_name = 'main.cpp'
+
 
 class RockStar:
 
-    def __init__(self, days=400):
+    def __init__(self, days=400, file_name=default_file_name,
+                 code=hello_world_c):
         self.days = days
-        self.file_path = os.path.join(os.getcwd(), 'main.cpp')
+        self.file_name = file_name
+        self.file_path = os.path.join(os.getcwd(), file_name)
+        self.code = code
         self.repo_path = os.getcwd()
 
     def _make_last_commit(self):
         with open(self.file_path, 'w') as f:
-            f.write(hello_world_c)
+            f.write(self.code)
 
         os.environ['GIT_AUTHOR_DATE'] = ''
         os.environ['GIT_COMMITTER_DATE'] = ''
