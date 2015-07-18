@@ -21,7 +21,15 @@ Time is very important. Do not waste time reading large manuals or [listen to pe
 
 Above script will create a git repository in the current directory. After that, create a repo on Github and push the local repo. That's all!
 
-`days` specify number of boxes you want to fill with green. Default value is 400. Remember, more commits, more green, more Rockstar you are! 
+`days` specify number of boxes you want to fill with green. Default value is 400. Remember, more commits, more green, more Rockstar you are!
+
+#### Become a Rockstar Swift Programmer with 5 years of experience:
+
+    from RockStar import RockStar
+
+    swift_code = "println('Hello world')"
+    rock_it_bro = RockStar(days=1900, file_name='hello.swift', code=swift_code)
+    rock_it_bro.make_me_a_rockstar()
 
 # Testimonials
 
@@ -34,6 +42,10 @@ Such glorious, much wow!
 Many people have received jobs from the big 4 after becoming a Rockstar, using `Rockstar`
 
 ![google](images/google.png)
+
+and also:
+
+![swiftguy](images/theGuyWhoCreatedSwift.png)
 
 Feel free to send a PR and add your name.
 
