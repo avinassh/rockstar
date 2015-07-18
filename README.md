@@ -6,7 +6,9 @@ This repo will not only teach you Complete C++ in just 2 minutes, also makes Ope
 
 Run `Rockstar`, be a Rockstar, show off your Github profile to everyone and bag those $200K programmer jobs. Once you become a Rockstar, every recruiter will want to hire you and there is no turning back.
 
-# Installation 
+# Installation
+
+`Rockstar` is Python 3 only library. Rockstar programmers don't code in Python 2.
 
     pip install rockstar
 
