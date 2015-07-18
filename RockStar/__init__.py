@@ -57,8 +57,10 @@ class RockStar:
         for day_delta in range(self.days):
             for i in range(randint(1, 10)):
                 dates_list.append(today - timedelta(days=day_delta))
-        return [datetime.combine(d,
-                                 self._get_random_time()) for d in dates_list]
+        yield from [
+            datetime.combine(d, self._get_random_time())
+            for d in dates_list
+        ]
 
     def make_me_a_rockstar(self):
         self.repo = git.Repo.init(self.repo_path)
