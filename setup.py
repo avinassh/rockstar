@@ -25,6 +25,11 @@ setup(
     license='MIT',
     description='Makes you a Rockstar programmer in 2 minutes',
     long_description=long_description,
+    entry_points={
+        'console_scripts': [
+            'rockstar = RockStar:main',
+        ]
+    },
     classifiers=[
         'Development Status :: 3 - Alpha',
         'License :: OSI Approved :: MIT License',

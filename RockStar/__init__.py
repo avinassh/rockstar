@@ -6,9 +6,8 @@ import uuid
 from datetime import time, date, datetime, timedelta
 from random import randint
 
+import click
 import git
-from progress.bar import Bar
-
 
 hello_world_c = """#include <iostream>
 int main()
@@ -62,9 +61,16 @@ class RockStar:
 
     def make_me_a_rockstar(self):
         self.repo = git.Repo.init(self.repo_path)
-        progress_msg = 'Making you a Rockstar Programmer'
-        bar = Bar(progress_msg, suffix='%(percent)d%%')
-        for commit_date in bar.iter(self._get_dates_list()):
-            self._edit_and_commit(str(uuid.uuid1()), commit_date)
+        label = 'Making you a Rockstar Programmer'
+        with click.progressbar(self._get_dates_list(), label=label) as bar:
+            for commit_date in bar:
+                self._edit_and_commit(str(uuid.uuid1()), commit_date)
         self._make_last_commit()
         print('\nYou are now a Rockstar Programmer!')
+
+
+@click.command()
+@click.option('--days', type=int, default=400)
+def main(days):
+    magic = RockStar(days=days)
+    magic.make_me_a_rockstar()
