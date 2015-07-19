@@ -25,12 +25,14 @@ Above script will create a git repository in the current directory. After that, 
 
 `days` specify number of boxes you want to fill with green. Default value is 400. Remember, more commits, more green, more Rockstar you are!
 
-#### Become a Rockstar Swift Programmer with 5 years of experience:
+`days_off` tells the world that you're a rockstart who takes Wednesdays and Sundays to meditate, and work on your guitar solos.
+
+#### Become a Rockstar Swift Programmer with 5 years of experience, who meditates on Tuesday:
 
     from RockStar import RockStar
 
     swift_code = "println('Hello world')"
-    rock_it_bro = RockStar(days=1900, file_name='hello.swift', code=swift_code)
+    rock_it_bro = RockStar(days=1900, file_name='hello.swift', code=swift_code, days_off=['Tuesday'])
     rock_it_bro.make_me_a_rockstar()
 
 # Testimonials

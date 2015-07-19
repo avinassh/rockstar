@@ -21,12 +21,13 @@ default_file_name = 'main.cpp'
 class RockStar:
 
     def __init__(self, days=400, file_name=default_file_name,
-                 code=hello_world_c):
+                 code=hello_world_c, days_off=[]):
         self.days = days
         self.file_name = file_name
         self.file_path = os.path.join(os.getcwd(), file_name)
         self.code = code
         self.repo_path = os.getcwd()
+        self.days_off = days_off
 
     def _make_last_commit(self):
         with open(self.file_path, 'w') as f:
@@ -55,7 +56,10 @@ class RockStar:
         dates_list = list()
         for day_delta in range(self.days):
             for i in range(randint(1, 10)):
-                dates_list.append(today - timedelta(days=day_delta))
+                day = today - timedelta(days=day_delta)
+                print day, day.strftime("%A"), day.strftime("%A") not in self.days_off
+                if day.strftime("%A") not in self.days_off:
+                    dates_list.append(today - timedelta(days=day_delta))
         return [datetime.combine(d,
                                  self._get_random_time()) for d in dates_list]
 
