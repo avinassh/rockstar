@@ -53,13 +53,13 @@ class RockStar:
                     second=randint(0, 59), microsecond=randint(0, 999999))
 
     def _get_dates_list(self):
-        today = date.today()
-        dates_list = list()
-        for day_delta in range(self.days):
-            for i in range(randint(1, 10)):
-                dates_list.append(today - timedelta(days=day_delta))
-        return [datetime.combine(d,
-                                 self._get_random_time()) for d in dates_list]
+        def dates():
+            today = date.today()
+            for day_delta in range(self.days):
+                for i in range(randint(1, 10)):
+                    yield today - timedelta(days=day_delta)
+        return [datetime.combine(d, self._get_random_time())
+                for d in dates()]
 
     def make_me_a_rockstar(self):
         self.repo = git.Repo.init(self.repo_path)
