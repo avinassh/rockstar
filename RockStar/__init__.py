@@ -54,6 +54,7 @@ class RockStar:
         today = date.today()
         dates_list = list()
         for day_delta in range(self.days):
+          # Change randint from 1, 10 to 0, 4 to not have a 400 day streak
             for i in range(randint(1, 10)):
                 dates_list.append(today - timedelta(days=day_delta))
         return [datetime.combine(d,
