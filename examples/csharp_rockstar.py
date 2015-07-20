@@ -1,6 +1,6 @@
 from RockStar import RockStar
 
-csharp_code = """public class Hello1
+csharp_code = """public class helloworld
 {
    public static void Main()
    {
