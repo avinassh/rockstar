@@ -1,4 +1,4 @@
-from RockStar import RockStar
+from rockstar import RockStar
 
 ruby_code = "puts 'Hello world'"
 rock_it_bro = RockStar(days=400, file_name='helloWorld.rb', code=ruby_code)

@@ -1,4 +1,4 @@
-from RockStar import RockStar
+from rockstar import RockStar
 
 pascal_code = """program HelloWorld;
 

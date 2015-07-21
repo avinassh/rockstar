@@ -73,6 +73,6 @@ class RockStar:
 
 @click.command()
 @click.option('--days', type=int, default=400)
-def main(days):
+def cli(days):
     magic = RockStar(days=days)
     magic.make_me_a_rockstar()

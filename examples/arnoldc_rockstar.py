@@ -1,4 +1,4 @@
-from RockStar import RockStar
+from rockstar import RockStar
 
 arnoldc_code = """IT'S SHOWTIME
 TALK TO THE HAND "Hello World"
