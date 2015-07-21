@@ -4,7 +4,7 @@ import os
 import sys
 import uuid
 from datetime import time, date, datetime, timedelta
-from random import randint
+from random import randint, random
 
 import click
 import git
@@ -23,12 +23,13 @@ default_file_name = 'main.cpp'
 class RockStar:
 
     def __init__(self, days=400, file_name=default_file_name,
-                 code=hello_world_c):
+                 code=hello_world_c, frequency=1.00):
         self.days = days
         self.file_name = file_name
         self.file_path = os.path.join(os.getcwd(), file_name)
         self.code = code
         self.repo_path = os.getcwd()
+        self.frequency = frequency
 
     def _make_last_commit(self):
         with open(self.file_path, 'w') as f:
@@ -56,8 +57,9 @@ class RockStar:
         def dates():
             today = date.today()
             for day_delta in range(self.days):
-                for i in range(randint(1, 10)):
-                    yield today - timedelta(days=day_delta)
+                if random() <= self.frequency:
+                    for i in range(randint(1, 10)):
+                        yield today - timedelta(days=day_delta)
         return [datetime.combine(d, self._get_random_time())
                 for d in dates()]
 
