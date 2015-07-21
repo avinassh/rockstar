@@ -16,7 +16,7 @@ Run `Rockstar`, be a Rockstar, show off your Github profile to everyone and bag 
 
 Time is very important. Do not waste time reading large manuals or [listen to people who tell you how to learn C++](http://norvig.com/21-days.html), run these couple of lines instead:
 
-    from RockStar import RockStar
+    from rockstar import RockStar
 
     rock_it_bro = RockStar(days=300)
     rock_it_bro.make_me_a_rockstar()
@@ -27,7 +27,7 @@ Above script will create a git repository in the current directory. After that, 
 
 #### Become a Rockstar Swift Programmer with 5 years of experience:
 
-    from RockStar import RockStar
+    from rockstar import RockStar
 
     swift_code = "println('Hello world')"
     rock_it_bro = RockStar(days=1900, file_name='hello.swift', code=swift_code)
