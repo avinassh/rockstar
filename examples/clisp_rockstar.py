@@ -1,4 +1,4 @@
-from rockstar import RockStar
+from RockStar import RockStar
 
 clisp_code = '(print "Hello, World!" )'
 rock_it_bro = RockStar(days=400, file_name='helloWorld.cl', code=clisp_code)

@@ -1,4 +1,4 @@
-from rockstar import RockStar
+from RockStar import RockStar
 
 intercal_code = """DO ,1 <- #13
 PLEASE DO ,1 SUB #1 <- #238

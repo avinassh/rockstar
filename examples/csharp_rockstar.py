@@ -1,4 +1,4 @@
-from rockstar import RockStar
+from RockStar import RockStar
 
 csharp_code = """using System;
 

@@ -1,4 +1,4 @@
-from rockstar import RockStar
+from RockStar import RockStar
 
 swift_code = "println('Hello world')"
 rock_it_bro = RockStar(days=400, file_name='hello.swift', code=swift_code)

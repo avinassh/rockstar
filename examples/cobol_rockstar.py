@@ -1,4 +1,4 @@
-from rockstar import RockStar
+from RockStar import RockStar
 
 cobol_code = """IDENTIFICATION DIVISION.
 PROGRAM-ID. HELLO-WORLD.

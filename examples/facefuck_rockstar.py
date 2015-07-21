@@ -1,4 +1,4 @@
-from rockstar import RockStar
+from RockStar import RockStar
 
 facefuck_code = (":) :) :) :) :) :) :) :) :) :)\n=(\n:> :) :) :) :) :) :) :) :> :) :) :) :) :) :) :) :) :) :) :> :) :) :) :> :) :< :< :< :< :(\n"
 		 "=)\n:> :) :) :P\n:> :) :P\n:) :) :) :) :) :) :) :P\n"
