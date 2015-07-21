@@ -1,4 +1,4 @@
-from RockStar import RockStar
+from rockstar import RockStar
 
 r_code = "cat ('Hello world!')"
 

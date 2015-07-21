@@ -1,5 +1,5 @@
 
-from RockStar import RockStar
+from rockstar import RockStar
 
 golo_code = """"module hello.world
 
