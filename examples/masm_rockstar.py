@@ -1,4 +1,4 @@
-from RockStar import RockStar
+from rockStar import RockStar
 
 masm_code = """data SEGMENT
   msg DB 'Hello, world.$'
