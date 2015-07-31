@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 
 import os
-import sys
 import uuid
+import json
 from datetime import time, date, datetime, timedelta
 from random import randint
+from random import choice
 
 import click
 import git
@@ -29,6 +30,21 @@ class RockStar:
         self.file_path = os.path.join(os.getcwd(), file_name)
         self.code = code
         self.repo_path = os.getcwd()
+        self.messages_file_name = 'commit-messages.json'
+        self.messages_file_path = os.path.join(os.path.dirname(
+            os.path.abspath(__file__)), self.messages_file_name)
+
+        self._load_commit_messages()
+
+    def _load_commit_messages(self):
+        with open(self.messages_file_path) as f:
+            messages_file_contents = json.load(f)
+        names = messages_file_contents['names']
+        messages = messages_file_contents['messages']
+        self.commit_messages = [m.format(name=choice(names)) for m in messages]
+
+    def _get_random_commit_message(self):
+        return choice(self.commit_messages)
 
     def _make_last_commit(self):
         with open(self.file_path, 'w') as f:
@@ -46,7 +62,7 @@ class RockStar:
         date_in_iso = commit_date.strftime("%Y-%m-%d %H:%M:%S")
         os.environ['GIT_AUTHOR_DATE'] = date_in_iso
         os.environ['GIT_COMMITTER_DATE'] = date_in_iso
-        self.repo.index.commit(message)
+        self.repo.index.commit(self._get_random_commit_message())
 
     def _get_random_time(self):
         return time(hour=randint(0, 23), minute=randint(0, 59),
