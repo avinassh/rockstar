@@ -23,7 +23,7 @@ default_file_name = 'main.cpp'
 
 class RockStar:
 
-    def __init__(self, days=400, file_name=default_file_name,
+    def __init__(self, days=400, days_off=[], file_name=default_file_name,
                  code=hello_world_c):
         self.days = days
         self.file_name = file_name
@@ -33,6 +33,7 @@ class RockStar:
         self.messages_file_name = 'commit-messages.json'
         self.messages_file_path = os.path.join(os.path.dirname(
             os.path.abspath(__file__)), self.messages_file_name)
+        self.days_off = list(map(str.capitalize, days_off))
 
         self._load_commit_messages()
 
@@ -73,7 +74,10 @@ class RockStar:
             today = date.today()
             for day_delta in range(self.days):
                 for i in range(randint(1, 10)):
-                    yield today - timedelta(days=day_delta)
+                    day = today - timedelta(days=day_delta)
+                    if day.strftime('%A') in self.days_off:
+                        continue
+                    yield day
         return [datetime.combine(d, self._get_random_time())
                 for d in dates()]
 
