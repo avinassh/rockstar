@@ -73,10 +73,10 @@ class RockStar:
         def dates():
             today = date.today()
             for day_delta in range(self.days):
+                day = today - timedelta(days=day_delta)
+                if day.strftime('%A') in self.days_off:
+                    continue
                 for i in range(randint(1, 10)):
-                    day = today - timedelta(days=day_delta)
-                    if day.strftime('%A') in self.days_off:
-                        continue
                     yield day
         return [datetime.combine(d, self._get_random_time())
                 for d in dates()]
