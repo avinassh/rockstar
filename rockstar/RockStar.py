@@ -72,11 +72,11 @@ class RockStar:
     def _get_dates_list(self):
         def dates():
             today = date.today()
-            for day_delta in range(self.days):
+            for day_delta in xrange(self.days - 1, -1, -1):
                 day = today - timedelta(days=day_delta)
                 if day.strftime('%A') in self.days_off:
                     continue
-                for i in range(randint(1, 10)):
+                for i in xrange(randint(1, 10)):
                     yield day
         return [datetime.combine(d, self._get_random_time())
                 for d in dates()]
