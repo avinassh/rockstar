@@ -11,7 +11,7 @@ except (IOError, ImportError):
 with open('requirements.txt') as f:
     requirements = f.read().splitlines()
 
-version = '0.3'
+version = '0.5'
 
 setup(
     name='rockstar',
@@ -27,7 +27,7 @@ setup(
     long_description=long_description,
     entry_points={
         'console_scripts': [
-            'rockstar = RockStar:main',
+            'rockstar = rockstar:cli',
         ]
     },
     classifiers=[

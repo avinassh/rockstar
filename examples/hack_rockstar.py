@@ -1,4 +1,4 @@
-from RockStar import RockStar
+from rockstar import RockStar
 
 hack_code = """<?hh
 echo 'Hello World';

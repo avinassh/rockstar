@@ -1,4 +1,4 @@
-from RockStar import RockStar
+from rockstar import RockStar
 
 chapel_code = 'writeln("Hello, world!");'
 rock_it_bro = RockStar(days=400, file_name='helloworld.chpl', code=chapel_code)

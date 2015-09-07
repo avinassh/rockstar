@@ -1,4 +1,4 @@
-from RockStar import RockStar
+from rockstar import RockStar
 
 intercal_code = """DO ,1 <- #13
 PLEASE DO ,1 SUB #1 <- #238
@@ -17,5 +17,6 @@ DO ,1 SUB #13 <- #162
 PLEASE READ OUT ,1
 PLEASE GIVE UP"""
 
-rock_it_bro = RockStar(days=400, file_name='helloworld.intercal', code=intercal_code)
+rock_it_bro = RockStar(days=400, file_name='helloworld.intercal',
+                       code=intercal_code)
 rock_it_bro.make_me_a_rockstar()
