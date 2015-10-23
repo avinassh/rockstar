@@ -1,0 +1,2 @@
+include LICENSE requirements.txt README.md
+include rockstar/commit-messages.json
