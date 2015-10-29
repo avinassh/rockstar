@@ -37,7 +37,7 @@ Above script will create a git repository in the current directory. After that, 
 ```py
 from rockstar import RockStar
 
-swift_code = "println('Hello world')"
+swift_code = "print('Hello world')"
 rock_it_bro = RockStar(days=1900, file_name='hello.swift', code=swift_code)
 rock_it_bro.make_me_a_rockstar()
 ```
