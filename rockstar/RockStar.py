@@ -24,7 +24,7 @@ default_file_name = 'main.cpp'
 class RockStar:
 
     def __init__(self, days=400, days_off=[], file_name=default_file_name,
-                 code=hello_world_c):
+                 code=hello_world_c, off_fraction=0.0):
         self.days = days
         self.file_name = file_name
         self.file_path = os.path.join(os.getcwd(), file_name)
@@ -75,6 +75,8 @@ class RockStar:
             for day_delta in range(self.days):
                 day = today - timedelta(days=day_delta)
                 if day.strftime('%A') in self.days_off:
+                    continue
+                if randint(1, 100) < off_fraction * 100:
                     continue
                 for i in range(randint(1, 10)):
                     yield day
