@@ -10,7 +10,7 @@ from random import choice
 import click
 import git
 
-hello_world_c = """#include <iostream>
+HELLO_WORLD_C = """#include <iostream>
 int main()
 {
   std::cout << "Hello World!" << std::endl;
@@ -18,13 +18,14 @@ int main()
 }
 """
 
-default_file_name = 'main.cpp'
+DEFAULT_FILE_NAME = 'main.cpp'
 
 
 class RockStar:
 
-    def __init__(self, days=400, days_off=[], file_name=default_file_name,
-                 code=hello_world_c, off_fraction=0.0):
+    def __init__(self, days=400, days_off=(), file_name=DEFAULT_FILE_NAME,
+                 code=HELLO_WORLD_C, off_fraction=0.0):
+        self.repo = None
         self.days = days
         self.file_name = file_name
         self.file_path = os.path.join(os.getcwd(), file_name)
@@ -66,7 +67,8 @@ class RockStar:
         os.environ['GIT_COMMITTER_DATE'] = date_in_iso
         self.repo.index.commit(self._get_random_commit_message())
 
-    def _get_random_time(self):
+    @staticmethod
+    def _get_random_time():
         return time(hour=randint(0, 23), minute=randint(0, 59),
                     second=randint(0, 59), microsecond=randint(0, 999999))
 
