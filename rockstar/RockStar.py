@@ -10,7 +10,7 @@ from random import choice
 import click
 import git
 
-HELLO_WORLD_C = """#include <iostream>
+HELLO_WORLD_CPP = """#include <iostream>
 int main()
 {
   std::cout << "Hello World!" << std::endl;
@@ -24,7 +24,7 @@ DEFAULT_FILE_NAME = 'main.cpp'
 class RockStar:
 
     def __init__(self, days=400, days_off=(), file_name=DEFAULT_FILE_NAME,
-                 code=HELLO_WORLD_C, off_fraction=0.0):
+                 code=HELLO_WORLD_CPP, off_fraction=0.0):
         self.repo = None
         self.days = days
         self.file_name = file_name
