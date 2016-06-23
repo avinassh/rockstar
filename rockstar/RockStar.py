@@ -10,7 +10,7 @@ from random import choice
 import click
 import git
 
-hello_world_c = """#include <iostream>
+HELLO_WORLD_CPP = """#include <iostream>
 int main()
 {
   std::cout << "Hello World!" << std::endl;
@@ -18,13 +18,14 @@ int main()
 }
 """
 
-default_file_name = 'main.cpp'
+DEFAULT_FILE_NAME = 'main.cpp'
 
 
 class RockStar:
 
-    def __init__(self, days=400, days_off=[], file_name=default_file_name,
-                 code=hello_world_c):
+    def __init__(self, days=400, days_off=(), file_name=DEFAULT_FILE_NAME,
+                 code=HELLO_WORLD_CPP, off_fraction=0.0):
+        self.repo = None
         self.days = days
         self.file_name = file_name
         self.file_path = os.path.join(os.getcwd(), file_name)
@@ -34,6 +35,7 @@ class RockStar:
         self.messages_file_path = os.path.join(os.path.dirname(
             os.path.abspath(__file__)), self.messages_file_name)
         self.days_off = list(map(str.capitalize, days_off))
+        self.off_fraction = off_fraction
 
         self._load_commit_messages()
 
@@ -65,7 +67,8 @@ class RockStar:
         os.environ['GIT_COMMITTER_DATE'] = date_in_iso
         self.repo.index.commit(self._get_random_commit_message())
 
-    def _get_random_time(self):
+    @staticmethod
+    def _get_random_time():
         return time(hour=randint(0, 23), minute=randint(0, 59),
                     second=randint(0, 59), microsecond=randint(0, 999999))
 
@@ -75,6 +78,8 @@ class RockStar:
             for day_delta in range(self.days):
                 day = today - timedelta(days=day_delta)
                 if day.strftime('%A') in self.days_off:
+                    continue
+                if randint(1, 100) < self.off_fraction * 100:
                     continue
                 for i in range(randint(1, 10)):
                     yield day
