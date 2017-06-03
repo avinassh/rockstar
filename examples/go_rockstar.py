@@ -1,4 +1,4 @@
-from rockstar import RockStar
+from RockStar import RockStar
 
 go_code = "writeln('Hello world')"
 rock_it_bro = RockStar(days=400, file_name='helloWorld.go', code=go_code)

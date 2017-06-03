@@ -1,4 +1,4 @@
-from rockstar import RockStar
+from RockStar import RockStar
 
 html_code = "<h1>Hello World!</h1>"
 rock_it_bro = RockStar(days=400, file_name='helloWorld.html', code=html_code)

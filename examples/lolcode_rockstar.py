@@ -1,4 +1,4 @@
-from rockstar import RockStar
+from RockStar import RockStar
 
 lolcode_code = """HAI
 CAN HAS STDIO?

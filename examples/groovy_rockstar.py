@@ -1,4 +1,4 @@
-from rockstar import RockStar
+from RockStar import RockStar
 
 groovy_code = "println 'Hello world'"
 rock_it_bro = RockStar(days=400, file_name='helloWorld.groovy',

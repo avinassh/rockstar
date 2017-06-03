@@ -1,4 +1,4 @@
-from rockstar import RockStar
+from RockStar import RockStar
 
 python_code = "print('Hello world')"
 rock_it_bro = RockStar(days=400, file_name='helloWorld.py', code=python_code)

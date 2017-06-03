@@ -1,4 +1,4 @@
-from rockstar import RockStar
+from RockStar import RockStar
 
 # yup, there is a programming language called `none`
 # https://bitbucket.org/duangle/none

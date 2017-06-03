@@ -1,4 +1,4 @@
-from rockstar import RockStar
+from RockStar import RockStar
 
 elixir_code = 'IO.puts "Hello world"'
 rock_it_bro = RockStar(days=400, file_name='helloWorld.exs', code=elixir_code)
