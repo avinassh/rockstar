@@ -13,7 +13,7 @@ Run `Rockstar`, be a Rockstar, show off your Github profile to everyone and bag 
 
 # Installation
 
-`Rockstar` is Python 3 only library. Rockstar programmers don't code in Python 2.
+`Rockstar` is Python 2&3 library.
 
     pip install rockstar
 
