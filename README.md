@@ -1,4 +1,4 @@
-# Rockstar
+# Intro  Of Rockstar
 
 [![downloads](https://img.shields.io/pypi/dm/rockstar.svg)](https://pypi.python.org/pypi/rockstar/)
 [![version](https://img.shields.io/pypi/v/rockstar.svg)](https://pypi.python.org/pypi/rockstar/)
@@ -66,9 +66,6 @@ and also:
 
 Feel free to send a PR and add your name.
 
-# Todo
-
-- [ ] Polyglot Rockstar
 
 # License
 
