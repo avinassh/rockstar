@@ -2,16 +2,13 @@
 
 from setuptools import setup, find_packages
 
-try:
-    import pypandoc
-    long_description = pypandoc.convert('README.md', 'rst')
-except (IOError, ImportError):
-    long_description = open('README.md').read()
+
+long_description = open('README.md').read()
 
 with open('requirements.txt') as f:
     requirements = f.read().splitlines()
 
-version = '0.5'
+version = '0.6'
 
 setup(
     name='rockstar',
@@ -25,6 +22,7 @@ setup(
     license='MIT',
     description='Makes you a Rockstar programmer in 2 minutes',
     long_description=long_description,
+    long_description_content_type='text/markdown',
     entry_points={
         'console_scripts': [
             'rockstar = rockstar:cli',
