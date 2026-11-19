@@ -5,6 +5,8 @@
 [![supported](https://img.shields.io/pypi/pyversions/rockstar.svg)](https://pypi.python.org/pypi/rockstar/)
 ![license](https://img.shields.io/pypi/l/rockstar.svg)
 
+For the Rockstar programming language and its interpreter, see [RockstarLang/rockstar](https://github.com/RockstarLang/rockstar).
+
 Rockstar is one amazing library, which will make you a Rockstar Programmer in just 2 minutes. In last decade, people learned [C++ in 21 days](http://www.amazon.com/dp/B0028CK0GW). But these days, it has come down to just [10 minutes](http://www.amazon.com/dp/0672324253). But, I wanted to do better.
 
 This repo will not only teach you Complete C++ in just 2 minutes, but also makes Open Source Contributions. You see, Open Source contributions are very important these days, especially if you can get those boxes filled with green on your Github profile. As an efficient programmer, I believe in killing two birds in just one shot.
