@@ -10,6 +10,11 @@ from random import choice
 import click
 import git
 
+_ENGLISH_WEEKDAYS = (
+    'Monday', 'Tuesday', 'Wednesday', 'Thursday',
+    'Friday', 'Saturday', 'Sunday',
+)
+
 HELLO_WORLD_CPP = """#include <iostream>
 int main()
 {
@@ -77,7 +82,11 @@ class RockStar:
             today = date.today()
             for day_delta in range(self.days):
                 day = today - timedelta(days=day_delta)
-                if day.strftime('%A') in self.days_off:
+                english_name = _ENGLISH_WEEKDAYS[day.weekday()]
+                if (
+                    english_name in self.days_off
+                    or day.strftime('%A') in self.days_off
+                ):
                     continue
                 if randint(1, 100) < self.off_fraction * 100:
                     continue
