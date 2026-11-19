@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import operator
 import os
 import uuid
 import json
@@ -26,6 +27,14 @@ _GIT_LOCATION_VARIABLES = (
 
 class _GitLocationError(ValueError):
     pass
+
+
+def _validate_day_count(days, today):
+    days = operator.index(days)
+    max_days = today.toordinal()
+    if not 0 <= days <= max_days:
+        raise ValueError('Choose a day count from 0 to {}.'.format(max_days))
+    return days
 
 
 class RockStar:
@@ -80,9 +89,11 @@ class RockStar:
                     second=randint(0, 59), microsecond=randint(0, 999999))
 
     def _get_dates_list(self):
+        today = date.today()
+        days = _validate_day_count(self.days, today)
+
         def dates():
-            today = date.today()
-            for day_delta in range(self.days):
+            for day_delta in range(days):
                 day = today - timedelta(days=day_delta)
                 if day.strftime('%A') in self.days_off:
                     continue
@@ -118,21 +129,29 @@ class RockStar:
             raise FileExistsError(
                 'Output file already exists: {}'.format(self.file_path))
 
+        commit_dates = self._get_dates_list()
         self.repo = git.Repo.init(self.repo_path, expand_vars=False)
         # Refuse files created since the earlier check before writing output.
         with open(self.file_path, 'x'):
             pass
 
         label = 'Making you a Rockstar Programmer'
-        with click.progressbar(self._get_dates_list(), label=label) as bar:
+        with click.progressbar(commit_dates, label=label) as bar:
             for commit_date in bar:
                 self._edit_and_commit(str(uuid.uuid1()), commit_date)
         self._make_last_commit()
         print('\nYou are now a Rockstar Programmer!')
 
 
+def _validate_days_option(_context, _parameter, value):
+    try:
+        return _validate_day_count(value, date.today())
+    except ValueError as error:
+        raise click.BadParameter(str(error)) from error
+
+
 @click.command()
-@click.option('--days', type=int, default=400)
+@click.option('--days', type=int, default=400, callback=_validate_days_option)
 def cli(days):
     magic = RockStar(days=days)
     try:
