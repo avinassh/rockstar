@@ -84,7 +84,7 @@ class DestinationTests(unittest.TestCase):
                 with self.subTest(filename=filename):
                     with patch('os.getcwd', return_value=str(root)):
                         rockstar = RockStar(days=0, file_name=filename)
-                    with patch('rockstar.RockStar.git.Repo') as repo, \
+                    with patch('git.Repo') as repo, \
                             patch('rockstar.RockStar.open', create=True) as output:
                         repo.side_effect = AssertionError('unexpected Git lookup')
                         with self.assertRaisesRegex(ValueError, error):
@@ -119,7 +119,7 @@ class DestinationTests(unittest.TestCase):
                 with self.subTest(filename=filename):
                     with patch('os.getcwd', return_value=str(root)):
                         rockstar = RockStar(days=0, file_name=filename)
-                    with patch('rockstar.RockStar.git.Repo') as repo, \
+                    with patch('git.Repo') as repo, \
                             patch('rockstar.RockStar.open', create=True) as output:
                         repo.side_effect = AssertionError('unexpected Git lookup')
                         with self.assertRaisesRegex(ValueError, error):
@@ -161,7 +161,7 @@ class DestinationTests(unittest.TestCase):
                         rockstar.make_me_a_rockstar()
                     init.assert_called_once_with(directory, expand_vars=False)
                     output.assert_called_once_with(rockstar.file_path, 'x')
-                    finish.assert_called_once()
+                    self.assertEqual(finish.call_count, 1)
 
     def test_in_tree_linked_parent_preserves_the_original_output_path(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -192,7 +192,7 @@ class DestinationTests(unittest.TestCase):
 
                     init.assert_called_once_with(str(root), expand_vars=False)
                     output.assert_called_once_with(str(root / filename), 'x')
-                    finish.assert_called_once()
+                    self.assertEqual(finish.call_count, 1)
 
     def test_link_into_a_nested_git_worktree_is_rejected(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -241,7 +241,7 @@ class DestinationTests(unittest.TestCase):
                 overrides = {name: value}
                 with self.subTest(name=name, value=value), \
                         patch.dict(os.environ, overrides, clear=True), \
-                        patch('rockstar.RockStar.git.Repo') as repo, \
+                        patch('git.Repo') as repo, \
                         patch('rockstar.RockStar.open', create=True) as output:
                     repo.side_effect = AssertionError('unexpected Git lookup')
                     with self.assertRaisesRegex(ValueError, name):
@@ -258,7 +258,7 @@ class DestinationTests(unittest.TestCase):
         }
         with patch.dict(os.environ, overrides), \
                 patch.object(RockStar, '_load_commit_messages'), \
-                patch('rockstar.RockStar.git.Repo') as repo, \
+                patch('git.Repo') as repo, \
                 patch('rockstar.RockStar.open', create=True) as output:
             repo.side_effect = AssertionError('unexpected Git lookup')
             result = CliRunner().invoke(cli, ['--days', '0'])

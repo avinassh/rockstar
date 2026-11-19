@@ -17,6 +17,9 @@ Run `Rockstar`, be a Rockstar, show off your Github profile to everyone and bag 
 
     pip install rockstar
 
+Git is required to create a repository. Make Git available on your `PATH` or
+set `GIT_PYTHON_GIT_EXECUTABLE` to the path of the Git executable.
+
 # Usage
 
 Use a new, empty directory outside any Git working tree. Rockstar writes its

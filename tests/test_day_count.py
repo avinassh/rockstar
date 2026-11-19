@@ -31,7 +31,7 @@ class DayCountTests(unittest.TestCase):
         mocks.enter_context(patch('uuid.uuid1', return_value='placeholder'))
         mocks.enter_context(patch('uuid.uuid4', return_value='placeholder'))
         self.repo = mocks.enter_context(
-            patch('rockstar.RockStar.git.Repo',
+            patch('git.Repo',
                   side_effect=git.InvalidGitRepositoryError))
         self.load_messages = mocks.enter_context(
             patch.object(RockStar, '_load_commit_messages'))
@@ -65,9 +65,9 @@ class DayCountTests(unittest.TestCase):
         with redirect_stdout(StringIO()):
             rockstar.make_me_a_rockstar()
 
-        self.repo.init.assert_called_once()
+        self.assertEqual(self.repo.init.call_count, 1)
         self.edit.assert_not_called()
-        self.finish.assert_called_once()
+        self.assertEqual(self.finish.call_count, 1)
 
     def test_indexable_days_can_reach_the_first_calendar_day(self):
         days = IndexedDayCount()
@@ -75,12 +75,12 @@ class DayCountTests(unittest.TestCase):
             RockStar(days=days).make_me_a_rockstar()
 
         self.assertEqual(days.calls, 1)
-        self.today.assert_called_once()
+        self.assertEqual(self.today.call_count, 1)
         self.assertEqual(self.edit.call_args_list, [
             call('placeholder', datetime(1, 1, 2, 1, 1, 1, 1)),
             call('placeholder', datetime(1, 1, 1, 1, 1, 1, 1)),
         ])
-        self.finish.assert_called_once()
+        self.assertEqual(self.finish.call_count, 1)
 
     def test_cli_reports_invalid_days_before_initializing(self):
         runner = CliRunner()

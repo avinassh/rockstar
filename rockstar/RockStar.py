@@ -10,7 +10,6 @@ from random import choice
 from pathlib import Path
 
 import click
-import git
 
 HELLO_WORLD_CPP = """#include <iostream>
 int main()
@@ -24,6 +23,8 @@ DEFAULT_FILE_NAME = 'main.cpp'
 _GIT_LOCATION_VARIABLES = (
     'GIT_DIR', 'GIT_WORK_TREE', 'GIT_COMMON_DIR', 'GIT_OBJECT_DIRECTORY',
 )
+_GIT_REQUIRED = ('Install Git or set GIT_PYTHON_GIT_EXECUTABLE '
+                 'to the path of a working Git executable.')
 
 
 class _GitLocationError(ValueError):
@@ -32,6 +33,29 @@ class _GitLocationError(ValueError):
 
 class _OutputPathError(ValueError):
     pass
+
+
+class _GitUnavailableError(RuntimeError):
+    pass
+
+
+def _require_git():
+    try:
+        import git
+        if not git.GIT_OK:
+            try:
+                git.refresh()
+            except git.GitCommandNotFound as error:
+                raise _GitUnavailableError(_GIT_REQUIRED) from error
+    except ImportError as error:
+        cause = error.__cause__ or error
+        if not str(cause).startswith('Bad git executable.'):
+            raise
+        raise _GitUnavailableError(_GIT_REQUIRED) from error
+
+    if not git.GIT_OK:
+        raise _GitUnavailableError(_GIT_REQUIRED)
+    return git
 
 
 def _check_output_location(path, root):
@@ -166,6 +190,7 @@ class RockStar:
                 '({}).'.format(names))
 
         output_parent = _resolve_output_parent(self.repo_path, self.file_path)
+        git = _require_git()
         try:
             existing_repo = git.Repo(
                 output_parent, search_parent_directories=True,
@@ -178,7 +203,10 @@ class RockStar:
                 'Choose a new directory outside any Git repository.')
 
         commit_dates = self._get_dates_list()
-        self.repo = git.Repo.init(self.repo_path, expand_vars=False)
+        try:
+            self.repo = git.Repo.init(self.repo_path, expand_vars=False)
+        except git.GitCommandNotFound as error:
+            raise _GitUnavailableError(_GIT_REQUIRED) from error
         # Refuse files created since the earlier check before writing output.
         with open(self.file_path, 'x'):
             pass
@@ -204,5 +232,6 @@ def cli(days):
     magic = RockStar(days=days)
     try:
         magic.make_me_a_rockstar()
-    except (FileExistsError, _GitLocationError, _OutputPathError) as error:
+    except (FileExistsError, _GitLocationError, _OutputPathError,
+            _GitUnavailableError) as error:
         raise click.ClickException(str(error)) from error
