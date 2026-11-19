@@ -1,6 +1,7 @@
 import os
 import tempfile
 import unittest
+from pathlib import Path
 from unittest.mock import patch
 
 import git
@@ -30,6 +31,55 @@ class DestinationTests(unittest.TestCase):
                         ):
                             with self.assertRaises(FileExistsError):
                                 rockstar.make_me_a_rockstar()
+
+    def test_existing_output_is_rejected_before_initializing_git(self):
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory) / 'main.cpp'
+            output.write_bytes(b'existing file')
+            with patch('os.getcwd', return_value=directory):
+                rockstar = RockStar()
+            with patch.object(git.Repo, 'init',
+                              side_effect=AssertionError('unexpected init')):
+                with self.assertRaises(FileExistsError):
+                    rockstar.make_me_a_rockstar()
+
+            self.assertEqual(output.read_bytes(), b'existing file')
+
+    def test_dangling_output_link_is_rejected_before_initializing_git(self):
+        with tempfile.TemporaryDirectory() as directory:
+            target = Path(directory) / 'missing.cpp'
+            output = Path(directory) / 'main.cpp'
+            try:
+                os.symlink(str(target), str(output))
+            except (OSError, NotImplementedError, AttributeError):
+                self.skipTest('symlinks are not available')
+
+            with patch('os.getcwd', return_value=directory):
+                rockstar = RockStar()
+            with patch.object(git.Repo, 'init',
+                              side_effect=AssertionError('unexpected init')):
+                with self.assertRaises(FileExistsError):
+                    rockstar.make_me_a_rockstar()
+
+            self.assertTrue(output.is_symlink())
+            self.assertFalse(target.exists())
+
+    def test_output_created_during_git_init_is_not_replaced(self):
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory) / 'main.cpp'
+            with patch('os.getcwd', return_value=directory):
+                rockstar = RockStar(days=0)
+
+            def initialize(*args, **kwargs):
+                output.write_bytes(b'other process output')
+
+            with patch.object(git.Repo, 'init', side_effect=initialize):
+                with patch.object(rockstar, '_make_last_commit') as finish:
+                    with self.assertRaises(FileExistsError):
+                        rockstar.make_me_a_rockstar()
+                    finish.assert_not_called()
+
+            self.assertEqual(output.read_bytes(), b'other process output')
 
     def test_cli_reports_that_it_needs_a_new_directory(self):
         runner = CliRunner()

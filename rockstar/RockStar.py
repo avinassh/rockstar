@@ -98,7 +98,15 @@ class RockStar:
             raise FileExistsError(
                 'Choose a new directory outside any Git repository.')
 
+        if os.path.lexists(self.file_path):
+            raise FileExistsError(
+                'Output file already exists: {}'.format(self.file_path))
+
         self.repo = git.Repo.init(self.repo_path, expand_vars=False)
+        # Refuse files created since the earlier check before writing output.
+        with open(self.file_path, 'x'):
+            pass
+
         label = 'Making you a Rockstar Programmer'
         with click.progressbar(self._get_dates_list(), label=label) as bar:
             for commit_date in bar:
