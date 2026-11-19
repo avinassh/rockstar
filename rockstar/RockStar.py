@@ -1,14 +1,15 @@
 #!/usr/bin/env python
 
+import operator
 import os
 import uuid
 import json
 from datetime import time, date, datetime, timedelta
 from random import randint
 from random import choice
+from pathlib import Path
 
 import click
-import git
 
 HELLO_WORLD_CPP = """#include <iostream>
 int main()
@@ -19,6 +20,96 @@ int main()
 """
 
 DEFAULT_FILE_NAME = 'main.cpp'
+_GIT_LOCATION_VARIABLES = (
+    'GIT_DIR', 'GIT_WORK_TREE', 'GIT_COMMON_DIR', 'GIT_OBJECT_DIRECTORY',
+)
+_GIT_REQUIRED = ('Install Git or set GIT_PYTHON_GIT_EXECUTABLE '
+                 'to the path of a working Git executable.')
+
+
+class _GitLocationError(ValueError):
+    pass
+
+
+class _OutputPathError(ValueError):
+    pass
+
+
+class _GitUnavailableError(RuntimeError):
+    pass
+
+
+def _require_git():
+    try:
+        import git
+        if not git.GIT_OK:
+            try:
+                git.refresh()
+            except git.GitCommandNotFound as error:
+                raise _GitUnavailableError(_GIT_REQUIRED) from error
+    except ImportError as error:
+        cause = error.__cause__ or error
+        if not str(cause).startswith('Bad git executable.'):
+            raise
+        raise _GitUnavailableError(_GIT_REQUIRED) from error
+
+    if not git.GIT_OK:
+        raise _GitUnavailableError(_GIT_REQUIRED)
+    return git
+
+
+def _check_output_location(path, root):
+    try:
+        relative = path.relative_to(root)
+    except ValueError:
+        raise _OutputPathError(
+            'Choose an output file inside the working directory.') from None
+
+    if any(part.lower() == '.git' for part in relative.parts):
+        raise _OutputPathError('Choose an output path outside Git metadata.')
+
+
+def _resolve_output_parent(work_directory, file_path):
+    if '\0' in file_path:
+        raise _OutputPathError('Choose a valid output filename.')
+    if os.path.lexists(file_path):
+        raise FileExistsError(
+            'Output file already exists: {}'.format(file_path))
+    if not os.path.basename(file_path):
+        raise _OutputPathError('Choose a valid output filename.')
+
+    root = Path(os.path.abspath(work_directory))
+    normalized_output = Path(os.path.abspath(file_path))
+    _check_output_location(normalized_output, root)
+
+    parent_error = 'Choose an output file with an existing parent directory.'
+    try:
+        parent = Path(file_path).parent
+        if not parent.is_dir():
+            raise _OutputPathError(parent_error)
+        # GitPython normalizes the path before adding it to the index.
+        if not parent.samefile(normalized_output.parent):
+            raise _OutputPathError('Choose an unambiguous output directory.')
+
+        parent = parent.resolve()
+        resolved_root = root.resolve()
+        parent_root = Path(*parent.parts[:len(resolved_root.parts)])
+        if not parent_root.samefile(resolved_root):
+            raise _OutputPathError(
+                'Choose an output file inside the working directory.')
+    except (OSError, RuntimeError):
+        raise _OutputPathError(parent_error) from None
+
+    _check_output_location(parent, parent_root)
+    return str(parent)
+
+
+def _validate_day_count(days, today):
+    days = operator.index(days)
+    max_days = today.toordinal()
+    if not 0 <= days <= max_days:
+        raise ValueError('Choose a day count from 0 to {}.'.format(max_days))
+    return days
 
 
 class RockStar:
@@ -73,9 +164,11 @@ class RockStar:
                     second=randint(0, 59), microsecond=randint(0, 999999))
 
     def _get_dates_list(self):
+        today = date.today()
+        days = _validate_day_count(self.days, today)
+
         def dates():
-            today = date.today()
-            for day_delta in range(self.days):
+            for day_delta in range(days):
                 day = today - timedelta(days=day_delta)
                 if day.strftime('%A') in self.days_off:
                     continue
@@ -87,17 +180,58 @@ class RockStar:
                 for d in dates()]
 
     def make_me_a_rockstar(self):
-        self.repo = git.Repo.init(self.repo_path)
+        git_location_variables = [
+            name for name in _GIT_LOCATION_VARIABLES if name in os.environ
+        ]
+        if git_location_variables:
+            names = ', '.join(git_location_variables)
+            raise _GitLocationError(
+                'Unset these Git location variables before running Rockstar '
+                '({}).'.format(names))
+
+        output_parent = _resolve_output_parent(self.repo_path, self.file_path)
+        git = _require_git()
+        try:
+            existing_repo = git.Repo(
+                output_parent, search_parent_directories=True,
+                expand_vars=False)
+        except git.InvalidGitRepositoryError:
+            pass
+        else:
+            existing_repo.close()
+            raise FileExistsError(
+                'Choose a new directory outside any Git repository.')
+
+        commit_dates = self._get_dates_list()
+        try:
+            self.repo = git.Repo.init(self.repo_path, expand_vars=False)
+        except git.GitCommandNotFound as error:
+            raise _GitUnavailableError(_GIT_REQUIRED) from error
+        # Refuse files created since the earlier check before writing output.
+        with open(self.file_path, 'x'):
+            pass
+
         label = 'Making you a Rockstar Programmer'
-        with click.progressbar(self._get_dates_list(), label=label) as bar:
+        with click.progressbar(commit_dates, label=label) as bar:
             for commit_date in bar:
                 self._edit_and_commit(str(uuid.uuid1()), commit_date)
         self._make_last_commit()
         print('\nYou are now a Rockstar Programmer!')
 
 
+def _validate_days_option(_context, _parameter, value):
+    try:
+        return _validate_day_count(value, date.today())
+    except ValueError as error:
+        raise click.BadParameter(str(error)) from error
+
+
 @click.command()
-@click.option('--days', type=int, default=400)
+@click.option('--days', type=int, default=400, callback=_validate_days_option)
 def cli(days):
     magic = RockStar(days=days)
-    magic.make_me_a_rockstar()
+    try:
+        magic.make_me_a_rockstar()
+    except (FileExistsError, _GitLocationError, _OutputPathError,
+            _GitUnavailableError) as error:
+        raise click.ClickException(str(error)) from error
