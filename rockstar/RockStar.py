@@ -3,7 +3,7 @@
 import os
 import uuid
 import json
-from datetime import time, date, datetime, timedelta
+from datetime import time, date, datetime, timedelta, timezone
 from random import randint
 from random import choice
 
@@ -53,19 +53,18 @@ class RockStar:
         with open(self.file_path, 'w') as f:
             f.write(self.code)
 
-        os.environ['GIT_AUTHOR_DATE'] = ''
-        os.environ['GIT_COMMITTER_DATE'] = ''
         self.repo.index.add([self.file_path])
-        self.repo.index.commit('Final commit :sunglasses:')
+        current_date = datetime.now(timezone.utc).astimezone()
+        self.repo.index.commit('Final commit :sunglasses:',
+                               author_date=current_date, commit_date=current_date)
 
     def _edit_and_commit(self, message, commit_date):
         with open(self.file_path, 'w') as f:
             f.write(message)
         self.repo.index.add([self.file_path])
         date_in_iso = commit_date.strftime("%Y-%m-%d %H:%M:%S")
-        os.environ['GIT_AUTHOR_DATE'] = date_in_iso
-        os.environ['GIT_COMMITTER_DATE'] = date_in_iso
-        self.repo.index.commit(self._get_random_commit_message())
+        self.repo.index.commit(self._get_random_commit_message(),
+                               author_date=date_in_iso, commit_date=date_in_iso)
 
     @staticmethod
     def _get_random_time():
