@@ -7,6 +7,7 @@ import json
 from datetime import time, date, datetime, timedelta
 from random import randint
 from random import choice
+from pathlib import Path
 
 import click
 import git
@@ -27,6 +28,56 @@ _GIT_LOCATION_VARIABLES = (
 
 class _GitLocationError(ValueError):
     pass
+
+
+class _OutputPathError(ValueError):
+    pass
+
+
+def _check_output_location(path, root):
+    try:
+        relative = path.relative_to(root)
+    except ValueError:
+        raise _OutputPathError(
+            'Choose an output file inside the working directory.') from None
+
+    if any(part.lower() == '.git' for part in relative.parts):
+        raise _OutputPathError('Choose an output path outside Git metadata.')
+
+
+def _resolve_output_parent(work_directory, file_path):
+    if '\0' in file_path:
+        raise _OutputPathError('Choose a valid output filename.')
+    if os.path.lexists(file_path):
+        raise FileExistsError(
+            'Output file already exists: {}'.format(file_path))
+    if not os.path.basename(file_path):
+        raise _OutputPathError('Choose a valid output filename.')
+
+    root = Path(os.path.abspath(work_directory))
+    normalized_output = Path(os.path.abspath(file_path))
+    _check_output_location(normalized_output, root)
+
+    parent_error = 'Choose an output file with an existing parent directory.'
+    try:
+        parent = Path(file_path).parent
+        if not parent.is_dir():
+            raise _OutputPathError(parent_error)
+        # GitPython normalizes the path before adding it to the index.
+        if not parent.samefile(normalized_output.parent):
+            raise _OutputPathError('Choose an unambiguous output directory.')
+
+        parent = parent.resolve()
+        resolved_root = root.resolve()
+        parent_root = Path(*parent.parts[:len(resolved_root.parts)])
+        if not parent_root.samefile(resolved_root):
+            raise _OutputPathError(
+                'Choose an output file inside the working directory.')
+    except (OSError, RuntimeError):
+        raise _OutputPathError(parent_error) from None
+
+    _check_output_location(parent, parent_root)
+    return str(parent)
 
 
 def _validate_day_count(days, today):
@@ -114,9 +165,10 @@ class RockStar:
                 'Unset these Git location variables before running Rockstar '
                 '({}).'.format(names))
 
+        output_parent = _resolve_output_parent(self.repo_path, self.file_path)
         try:
             existing_repo = git.Repo(
-                self.repo_path, search_parent_directories=True,
+                output_parent, search_parent_directories=True,
                 expand_vars=False)
         except git.InvalidGitRepositoryError:
             pass
@@ -124,10 +176,6 @@ class RockStar:
             existing_repo.close()
             raise FileExistsError(
                 'Choose a new directory outside any Git repository.')
-
-        if os.path.lexists(self.file_path):
-            raise FileExistsError(
-                'Output file already exists: {}'.format(self.file_path))
 
         commit_dates = self._get_dates_list()
         self.repo = git.Repo.init(self.repo_path, expand_vars=False)
@@ -156,5 +204,5 @@ def cli(days):
     magic = RockStar(days=days)
     try:
         magic.make_me_a_rockstar()
-    except (FileExistsError, _GitLocationError) as error:
+    except (FileExistsError, _GitLocationError, _OutputPathError) as error:
         raise click.ClickException(str(error)) from error

@@ -2,7 +2,7 @@ import os
 import tempfile
 import unittest
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import mock_open, patch
 
 import git
 from click.testing import CliRunner
@@ -63,6 +63,158 @@ class DestinationTests(unittest.TestCase):
 
             self.assertTrue(output.is_symlink())
             self.assertFalse(target.exists())
+
+    def test_invalid_output_paths_do_not_open_or_initialize_git(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory) / 'work'
+            root.mkdir()
+            sibling = Path(directory) / 'work-other'
+            sibling.mkdir()
+            (root / 'file-parent').touch()
+            cases = (
+                (str(sibling / 'output.cpp'), 'inside the working directory'),
+                ('missing/output.cpp', 'existing parent directory'),
+                ('missing/../output.cpp', 'existing parent directory'),
+                ('file-parent/output.cpp', 'existing parent directory'),
+                ('missing-output/', 'valid output filename'),
+                ('invalid\x00.cpp', 'valid output filename'),
+                ('nested/.GiT/output.cpp', 'Git metadata'),
+            )
+            for filename, error in cases:
+                with self.subTest(filename=filename):
+                    with patch('os.getcwd', return_value=str(root)):
+                        rockstar = RockStar(days=0, file_name=filename)
+                    with patch('rockstar.RockStar.git.Repo') as repo, \
+                            patch('rockstar.RockStar.open', create=True) as output:
+                        repo.side_effect = AssertionError('unexpected Git lookup')
+                        with self.assertRaisesRegex(ValueError, error):
+                            rockstar.make_me_a_rockstar()
+                        repo.assert_not_called()
+                        repo.init.assert_not_called()
+                        output.assert_not_called()
+
+    def test_linked_output_parents_are_validated_before_initializing(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory) / 'work'
+            root.mkdir()
+            sibling = Path(directory) / 'other'
+            sibling.mkdir()
+            metadata = root / '.GiT'
+            metadata.mkdir()
+            target = root / 'nested' / 'child'
+            target.mkdir(parents=True)
+            try:
+                os.symlink(str(sibling), str(root / 'outer-link'))
+                os.symlink(str(metadata), str(root / 'metadata-link'))
+                os.symlink(str(target), str(root / 'nested-link'))
+            except (OSError, NotImplementedError, AttributeError):
+                self.skipTest('symlinks are not available')
+
+            cases = (
+                ('outer-link/output.cpp', 'inside the working directory'),
+                ('metadata-link/output.cpp', 'Git metadata'),
+                ('nested-link/../output.cpp', 'unambiguous output directory'),
+            )
+            for filename, error in cases:
+                with self.subTest(filename=filename):
+                    with patch('os.getcwd', return_value=str(root)):
+                        rockstar = RockStar(days=0, file_name=filename)
+                    with patch('rockstar.RockStar.git.Repo') as repo, \
+                            patch('rockstar.RockStar.open', create=True) as output:
+                        repo.side_effect = AssertionError('unexpected Git lookup')
+                        with self.assertRaisesRegex(ValueError, error):
+                            rockstar.make_me_a_rockstar()
+                        repo.assert_not_called()
+                        repo.init.assert_not_called()
+                        output.assert_not_called()
+
+    def test_output_inside_a_nested_git_worktree_is_rejected(self):
+        with tempfile.TemporaryDirectory() as directory:
+            nested = Path(directory) / 'nested'
+            nested.mkdir()
+            with git.Repo.init(str(nested)):
+                pass
+            parent = nested / 'child'
+            parent.mkdir()
+            with patch('os.getcwd', return_value=directory):
+                rockstar = RockStar(days=0, file_name='nested/child/output.cpp')
+            with patch.object(
+                    git.Repo, 'init',
+                    side_effect=AssertionError('unexpected init')), \
+                    patch('rockstar.RockStar.open', create=True) as output:
+                with self.assertRaisesRegex(FileExistsError, 'Git repository'):
+                    rockstar.make_me_a_rockstar()
+                output.assert_not_called()
+
+    def test_in_tree_relative_and_absolute_output_paths_are_accepted(self):
+        with tempfile.TemporaryDirectory() as directory:
+            parent = Path(directory) / 'nested'
+            parent.mkdir()
+            for filename in ('nested/relative.cpp', str(parent / 'absolute.cpp')):
+                with self.subTest(filename=filename):
+                    with patch('os.getcwd', return_value=directory):
+                        rockstar = RockStar(days=0, file_name=filename)
+                    with patch.object(git.Repo, 'init') as init, \
+                            patch('rockstar.RockStar.open', mock_open(),
+                                  create=True) as output, \
+                            patch.object(rockstar, '_make_last_commit') as finish:
+                        rockstar.make_me_a_rockstar()
+                    init.assert_called_once_with(directory, expand_vars=False)
+                    output.assert_called_once_with(rockstar.file_path, 'x')
+                    finish.assert_called_once()
+
+    def test_in_tree_linked_parent_preserves_the_original_output_path(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory) / 'work'
+            parent = root / 'nested'
+            parent.mkdir(parents=True)
+            targets = [parent]
+            alternate = root.with_name('WORK') / 'nested'
+            if alternate.is_dir() and alternate.samefile(parent):
+                targets.append(alternate)
+
+            for index, target in enumerate(targets):
+                with self.subTest(target=target):
+                    link = root / ('in-tree-link-{}'.format(index))
+                    try:
+                        os.symlink(str(target), str(link))
+                    except (OSError, NotImplementedError, AttributeError):
+                        self.skipTest('symlinks are not available')
+
+                    filename = os.path.join(link.name, 'output.cpp')
+                    with patch('os.getcwd', return_value=str(root)):
+                        rockstar = RockStar(days=0, file_name=filename)
+                    with patch.object(git.Repo, 'init') as init, \
+                            patch('rockstar.RockStar.open', mock_open(),
+                                  create=True) as output, \
+                            patch.object(rockstar, '_make_last_commit') as finish:
+                        rockstar.make_me_a_rockstar()
+
+                    init.assert_called_once_with(str(root), expand_vars=False)
+                    output.assert_called_once_with(str(root / filename), 'x')
+                    finish.assert_called_once()
+
+    def test_link_into_a_nested_git_worktree_is_rejected(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            nested = root / 'nested'
+            nested.mkdir()
+            try:
+                os.symlink(str(nested), str(root / 'nested-link'))
+            except (OSError, NotImplementedError, AttributeError):
+                self.skipTest('symlinks are not available')
+            with git.Repo.init(str(nested)):
+                pass
+
+            with patch('os.getcwd', return_value=directory):
+                rockstar = RockStar(days=0, file_name='nested-link/output.cpp')
+            with patch.object(
+                    git.Repo, 'init',
+                    side_effect=AssertionError('unexpected init')), \
+                    patch('rockstar.RockStar.open', create=True) as output:
+                with self.assertRaisesRegex(FileExistsError, 'Git repository'):
+                    rockstar.make_me_a_rockstar()
+                output.assert_not_called()
 
     def test_output_created_during_git_init_is_not_replaced(self):
         with tempfile.TemporaryDirectory() as directory:

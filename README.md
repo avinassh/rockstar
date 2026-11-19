@@ -21,7 +21,8 @@ Run `Rockstar`, be a Rockstar, show off your Github profile to everyone and bag 
 
 Use a new, empty directory outside any Git working tree. Rockstar writes its
 output file in that directory (`main.cpp` by default). Rockstar stops if that
-output path already exists.
+output path already exists. For a custom `file_name`, keep the output inside
+the working directory and create its parent directory first.
 
 Time is very important. Do not waste time reading large manuals or [listen to people who tell you how to learn C++](http://norvig.com/21-days.html), run these couple of lines instead:
 
