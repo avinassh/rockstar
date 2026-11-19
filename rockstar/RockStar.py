@@ -91,7 +91,7 @@ class RockStar:
         label = 'Making you a Rockstar Programmer'
         with click.progressbar(self._get_dates_list(), label=label) as bar:
             for commit_date in bar:
-                self._edit_and_commit(str(uuid.uuid1()), commit_date)
+                self._edit_and_commit(str(uuid.uuid4()), commit_date)
         self._make_last_commit()
         print('\nYou are now a Rockstar Programmer!')
 
