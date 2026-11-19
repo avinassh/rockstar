@@ -5,6 +5,7 @@ import uuid
 import json
 from datetime import time, date, datetime, timedelta
 from random import randint
+from random import random
 from random import choice
 
 import click
@@ -79,7 +80,7 @@ class RockStar:
                 day = today - timedelta(days=day_delta)
                 if day.strftime('%A') in self.days_off:
                     continue
-                if randint(1, 100) < self.off_fraction * 100:
+                if random() < self.off_fraction:
                     continue
                 for i in range(randint(1, 10)):
                     yield day
