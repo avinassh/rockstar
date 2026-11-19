@@ -87,7 +87,18 @@ class RockStar:
                 for d in dates()]
 
     def make_me_a_rockstar(self):
-        self.repo = git.Repo.init(self.repo_path)
+        try:
+            existing_repo = git.Repo(
+                self.repo_path, search_parent_directories=True,
+                expand_vars=False)
+        except git.InvalidGitRepositoryError:
+            pass
+        else:
+            existing_repo.close()
+            raise FileExistsError(
+                'Choose a new directory outside any Git repository.')
+
+        self.repo = git.Repo.init(self.repo_path, expand_vars=False)
         label = 'Making you a Rockstar Programmer'
         with click.progressbar(self._get_dates_list(), label=label) as bar:
             for commit_date in bar:
@@ -100,4 +111,7 @@ class RockStar:
 @click.option('--days', type=int, default=400)
 def cli(days):
     magic = RockStar(days=days)
-    magic.make_me_a_rockstar()
+    try:
+        magic.make_me_a_rockstar()
+    except FileExistsError as error:
+        raise click.ClickException(str(error)) from error
