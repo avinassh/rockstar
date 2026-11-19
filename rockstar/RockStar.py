@@ -19,6 +19,13 @@ int main()
 """
 
 DEFAULT_FILE_NAME = 'main.cpp'
+_GIT_LOCATION_VARIABLES = (
+    'GIT_DIR', 'GIT_WORK_TREE', 'GIT_COMMON_DIR', 'GIT_OBJECT_DIRECTORY',
+)
+
+
+class _GitLocationError(ValueError):
+    pass
 
 
 class RockStar:
@@ -87,6 +94,15 @@ class RockStar:
                 for d in dates()]
 
     def make_me_a_rockstar(self):
+        git_location_variables = [
+            name for name in _GIT_LOCATION_VARIABLES if name in os.environ
+        ]
+        if git_location_variables:
+            names = ', '.join(git_location_variables)
+            raise _GitLocationError(
+                'Unset these Git location variables before running Rockstar '
+                '({}).'.format(names))
+
         try:
             existing_repo = git.Repo(
                 self.repo_path, search_parent_directories=True,
@@ -121,5 +137,5 @@ def cli(days):
     magic = RockStar(days=days)
     try:
         magic.make_me_a_rockstar()
-    except FileExistsError as error:
+    except (FileExistsError, _GitLocationError) as error:
         raise click.ClickException(str(error)) from error
