@@ -13,6 +13,7 @@ version = '0.6'
 setup(
     name='rockstar',
     version=version,
+    python_requires='>=3.5',
     install_requires=requirements,
     author='Avinash Sajjanshetty',
     author_email='hi@avi.im',
@@ -37,8 +38,6 @@ setup(
         'Operating System :: OS Independent',
         'Programming Language :: Python',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.3',
-        'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
         'Topic :: Internet',
         'Topic :: Software Development :: Libraries',

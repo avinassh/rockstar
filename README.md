@@ -13,7 +13,7 @@ Run `Rockstar`, be a Rockstar, show off your Github profile to everyone and bag 
 
 # Installation
 
-`Rockstar` is Python 3 only library. Rockstar programmers don't code in Python 2.
+`Rockstar` requires Python 3.5 or later.
 
     pip install rockstar
 
