@@ -40,7 +40,7 @@ class RockStar:
         self._load_commit_messages()
 
     def _load_commit_messages(self):
-        with open(self.messages_file_path) as f:
+        with open(self.messages_file_path, encoding='utf-8') as f:
             messages_file_contents = json.load(f)
         names = messages_file_contents['names']
         messages = messages_file_contents['messages']
